@@ -1,0 +1,28 @@
+services:
+  database:
+    image: postgres:16-alpine
+    ports:
+      - 5434:5432
+    env_file:
+      - .env
+    networks:
+      - my-network
+  migrate:
+    build:
+      context: .
+    image: migration:v2
+    depends_on:
+      - database
+    env_file:
+      - .env
+    environment:
+      - DATABASE_HOST=database
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=${POSTGRES_DB}
+      - DATABASE_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - my-network
+networks:
+  my-network:
+    driver: bridge

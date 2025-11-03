@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS note_permissions (
+    id BIGSERIAL PRIMARY KEY,
+    note_id BIGINT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    permission TEXT NOT NULL CHECK (permission IN ('OWNER','EDITOR','VIEWER'))
+);
