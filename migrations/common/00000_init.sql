@@ -6,6 +6,9 @@
 -- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- CREATE EXTENSION IF NOT EXISTS "hstore";
 
+-- Create the api schema for application tables
+CREATE SCHEMA IF NOT EXISTS api;
+
 -- Common schemas or roles can be defined here
 -- CREATE SCHEMA IF NOT EXISTS shared;
 

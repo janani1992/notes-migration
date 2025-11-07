@@ -1,5 +1,5 @@
 -- Create comment_replies table
-CREATE TABLE comment_replies (
+CREATE TABLE api.comment_replies (
   id BIGSERIAL PRIMARY KEY,
   comment_id BIGINT NOT NULL,
   note_id BIGINT NOT NULL,
@@ -10,12 +10,12 @@ CREATE TABLE comment_replies (
   content TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
-  FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id)
+  FOREIGN KEY (comment_id) REFERENCES api.comments(id) ON DELETE CASCADE,
+  FOREIGN KEY (note_id) REFERENCES api.notes(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES api.users(id)
 );
 
 -- Create indexes for comment_replies table
-CREATE INDEX idx_comment_replies_comment_id ON comment_replies(comment_id);
-CREATE INDEX idx_comment_replies_note_id ON comment_replies(note_id);
-CREATE INDEX idx_comment_replies_user_id ON comment_replies(user_id);
+CREATE INDEX idx_comment_replies_comment_id ON api.comment_replies(comment_id);
+CREATE INDEX idx_comment_replies_note_id ON api.comment_replies(note_id);
+CREATE INDEX idx_comment_replies_user_id ON api.comment_replies(user_id);

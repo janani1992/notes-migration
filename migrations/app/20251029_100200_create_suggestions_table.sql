@@ -1,5 +1,5 @@
 -- Create suggestions table
-CREATE TABLE suggestions (
+CREATE TABLE api.suggestions (
   id BIGSERIAL PRIMARY KEY,
   note_id BIGINT NOT NULL,
   user_id BIGINT NOT NULL,
@@ -18,13 +18,13 @@ CREATE TABLE suggestions (
   accepted_at TIMESTAMP WITH TIME ZONE NULL,
   accepted_by BIGINT,
   rejection_reason TEXT,
-  FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  CONSTRAINT fk_accepted_by FOREIGN KEY (accepted_by) REFERENCES users(id)
+  FOREIGN KEY (note_id) REFERENCES api.notes(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES api.users(id),
+  CONSTRAINT fk_accepted_by FOREIGN KEY (accepted_by) REFERENCES api.users(id)
 );
 
 -- Create indexes for suggestions table
-CREATE INDEX idx_suggestions_note_id ON suggestions(note_id);
-CREATE INDEX idx_suggestions_user_id ON suggestions(user_id);
-CREATE INDEX idx_suggestions_status ON suggestions(status);
-CREATE INDEX idx_suggestions_line_start ON suggestions(line_start);
+CREATE INDEX idx_suggestions_note_id ON api.suggestions(note_id);
+CREATE INDEX idx_suggestions_user_id ON api.suggestions(user_id);
+CREATE INDEX idx_suggestions_status ON api.suggestions(status);
+CREATE INDEX idx_suggestions_line_start ON api.suggestions(line_start);

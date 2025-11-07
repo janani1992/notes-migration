@@ -2,7 +2,7 @@
 -- This table stores file attachments that can be associated with notes
 
 -- Create attachments table
-CREATE TABLE IF NOT EXISTS attachments (
+CREATE TABLE IF NOT EXISTS api.attachments (
     id BIGSERIAL PRIMARY KEY,
     filename VARCHAR(255) NOT NULL,
     hash VARCHAR(255) NOT NULL UNIQUE,
@@ -10,11 +10,11 @@ CREATE TABLE IF NOT EXISTS attachments (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     note_id BIGINT,
-    FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (note_id) REFERENCES api.notes(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- Create trigger to update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_updated_at_column()
+CREATE OR REPLACE FUNCTION api.update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = CURRENT_TIMESTAMP;
@@ -23,11 +23,11 @@ END;
 $$ language 'plpgsql';
 
 CREATE TRIGGER update_attachments_updated_at 
-    BEFORE UPDATE ON attachments 
+    BEFORE UPDATE ON api.attachments 
     FOR EACH ROW 
-    EXECUTE FUNCTION update_updated_at_column();
+    EXECUTE FUNCTION api.update_updated_at_column();
 
 -- Add indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_attachments_hash ON attachments(hash);
-CREATE INDEX IF NOT EXISTS idx_attachments_note_id ON attachments(note_id);
-CREATE INDEX IF NOT EXISTS idx_attachments_filename ON attachments(filename);
+CREATE INDEX IF NOT EXISTS idx_attachments_hash ON api.attachments(hash);
+CREATE INDEX IF NOT EXISTS idx_attachments_note_id ON api.attachments(note_id);
+CREATE INDEX IF NOT EXISTS idx_attachments_filename ON api.attachments(filename);
