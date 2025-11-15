@@ -1,5 +1,5 @@
 -- Create notes table with BIGSERIAL primary key for JPA/Hibernate compatibility
-CREATE TABLE IF NOT EXISTS notes (
+CREATE TABLE IF NOT EXISTS api.notes (
     id BIGSERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     content VARCHAR(1000) NOT NULL,

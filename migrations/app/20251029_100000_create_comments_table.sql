@@ -1,5 +1,5 @@
 -- Create comments table
-CREATE TABLE comments (
+CREATE TABLE api.comments (
   id BIGSERIAL PRIMARY KEY,
   note_id BIGINT NOT NULL,
   user_id BIGINT NOT NULL,
@@ -15,13 +15,13 @@ CREATE TABLE comments (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   resolved_at TIMESTAMP WITH TIME ZONE NULL,
   resolved_by BIGINT,
-  FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  CONSTRAINT fk_resolved_by FOREIGN KEY (resolved_by) REFERENCES users(id)
+  FOREIGN KEY (note_id) REFERENCES api.notes(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES api.users(id),
+  CONSTRAINT fk_resolved_by FOREIGN KEY (resolved_by) REFERENCES api.users(id)
 );
 
 -- Create indexes for comments table
-CREATE INDEX idx_comments_note_id ON comments(note_id);
-CREATE INDEX idx_comments_user_id ON comments(user_id);
-CREATE INDEX idx_comments_status ON comments(status);
-CREATE INDEX idx_comments_line_start ON comments(line_start);
+CREATE INDEX idx_comments_note_id ON api.comments(note_id);
+CREATE INDEX idx_comments_user_id ON api.comments(user_id);
+CREATE INDEX idx_comments_status ON api.comments(status);
+CREATE INDEX idx_comments_line_start ON api.comments(line_start);

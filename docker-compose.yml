@@ -13,6 +13,7 @@ services:
     image: migration:v2
     depends_on:
       - database
+    restart: "no"
     env_file:
       - .env
     environment:
