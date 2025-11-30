@@ -22,6 +22,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_attachments_updated_at ON api.attachments;
 CREATE TRIGGER update_attachments_updated_at 
     BEFORE UPDATE ON api.attachments 
     FOR EACH ROW 
