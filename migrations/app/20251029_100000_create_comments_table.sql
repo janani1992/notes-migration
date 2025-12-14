@@ -1,5 +1,5 @@
 -- Create comments table
-CREATE TABLE api.comments (
+CREATE TABLE IF NOT EXISTS api.comments (
   id BIGSERIAL PRIMARY KEY,
   note_id BIGINT NOT NULL,
   user_id BIGINT NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE api.comments (
 );
 
 -- Create indexes for comments table
-CREATE INDEX idx_comments_note_id ON api.comments(note_id);
-CREATE INDEX idx_comments_user_id ON api.comments(user_id);
-CREATE INDEX idx_comments_status ON api.comments(status);
-CREATE INDEX idx_comments_line_start ON api.comments(line_start);
+CREATE INDEX IF NOT EXISTS idx_comments_note_id ON api.comments(note_id);
+CREATE INDEX IF NOT EXISTS idx_comments_user_id ON api.comments(user_id);
+CREATE INDEX IF NOT EXISTS idx_comments_status ON api.comments(status);
+CREATE INDEX IF NOT EXISTS idx_comments_line_start ON api.comments(line_start);

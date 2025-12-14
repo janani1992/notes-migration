@@ -30,5 +30,4 @@ CREATE TRIGGER update_attachments_updated_at
 
 -- Add indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_attachments_hash ON api.attachments(hash);
-CREATE INDEX IF NOT EXISTS idx_attachments_note_id ON api.attachments(note_id);
 CREATE INDEX IF NOT EXISTS idx_attachments_filename ON api.attachments(filename);
