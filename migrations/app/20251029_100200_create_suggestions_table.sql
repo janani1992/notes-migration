@@ -1,5 +1,5 @@
 -- Create suggestions table
-CREATE TABLE api.suggestions (
+CREATE TABLE IF NOT EXISTS api.suggestions (
   id BIGSERIAL PRIMARY KEY,
   note_id BIGINT NOT NULL,
   user_id BIGINT NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE api.suggestions (
 );
 
 -- Create indexes for suggestions table
-CREATE INDEX idx_suggestions_note_id ON api.suggestions(note_id);
-CREATE INDEX idx_suggestions_user_id ON api.suggestions(user_id);
-CREATE INDEX idx_suggestions_status ON api.suggestions(status);
-CREATE INDEX idx_suggestions_line_start ON api.suggestions(line_start);
+CREATE INDEX IF NOT EXISTS idx_suggestions_note_id ON api.suggestions(note_id);
+CREATE INDEX IF NOT EXISTS idx_suggestions_user_id ON api.suggestions(user_id);
+CREATE INDEX IF NOT EXISTS idx_suggestions_status ON api.suggestions(status);
+CREATE INDEX IF NOT EXISTS idx_suggestions_line_start ON api.suggestions(line_start);

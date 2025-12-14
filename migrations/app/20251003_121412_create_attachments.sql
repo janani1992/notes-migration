@@ -22,6 +22,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_attachments_updated_at ON api.attachments;
 CREATE TRIGGER update_attachments_updated_at 
     BEFORE UPDATE ON api.attachments 
     FOR EACH ROW 
@@ -29,5 +30,4 @@ CREATE TRIGGER update_attachments_updated_at
 
 -- Add indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_attachments_hash ON api.attachments(hash);
-CREATE INDEX IF NOT EXISTS idx_attachments_note_id ON api.attachments(note_id);
 CREATE INDEX IF NOT EXISTS idx_attachments_filename ON api.attachments(filename);

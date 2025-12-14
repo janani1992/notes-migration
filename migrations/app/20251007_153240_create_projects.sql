@@ -12,5 +12,15 @@ CREATE TABLE IF NOT EXISTS api.projects (
 CREATE INDEX IF NOT EXISTS idx_projects_name ON api.projects(name);
 
 -- Add constraints with descriptive names
-ALTER TABLE api.projects ADD CONSTRAINT chk_projects_name_not_empty 
-    CHECK (name IS NOT NULL AND LENGTH(TRIM(name)) > 0);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'chk_projects_name_not_empty' 
+        AND table_name = 'projects' AND table_schema = 'api'
+    ) THEN
+        ALTER TABLE api.projects ADD CONSTRAINT chk_projects_name_not_empty 
+            CHECK (name IS NOT NULL AND LENGTH(TRIM(name)) > 0);
+    END IF;
+END
+$$;

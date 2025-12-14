@@ -1,5 +1,16 @@
 -- Add user_id to notes table as nullable
-ALTER TABLE api.notes ADD COLUMN user_id BIGINT;
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'api' 
+        AND table_name = 'notes' 
+        AND column_name = 'user_id'
+    ) THEN
+        ALTER TABLE api.notes ADD COLUMN user_id BIGINT;
+    END IF;
+END
+$$;
 
 -- Set user_id for existing notes (choose a default user, e.g., admin user with id=1)
 UPDATE api.notes SET user_id = 1 WHERE user_id IS NULL;
@@ -8,7 +19,17 @@ UPDATE api.notes SET user_id = 1 WHERE user_id IS NULL;
 ALTER TABLE api.notes ALTER COLUMN user_id SET NOT NULL;
 
 -- Add foreign key constraint (optional, recommended)
-ALTER TABLE api.notes ADD CONSTRAINT fk_notes_user FOREIGN KEY (user_id) REFERENCES api.users(id);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_notes_user' 
+        AND table_name = 'notes' AND table_schema = 'api'
+    ) THEN
+        ALTER TABLE api.notes ADD CONSTRAINT fk_notes_user FOREIGN KEY (user_id) REFERENCES api.users(id);
+    END IF;
+END
+$$;
 
 -- Ensure no notes have NULL content before enforcing NOT NULL constraint
 UPDATE api.notes SET content = '' WHERE content IS NULL;
@@ -24,4 +45,12 @@ BEGIN
     END IF;
 END$$;
 
-ALTER TABLE api.notes ADD CONSTRAINT notes_user_title_unique UNIQUE (user_id, title);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints
+        WHERE constraint_name = 'notes_user_title_unique' AND table_name = 'notes' AND table_schema = 'api'
+    ) THEN
+        ALTER TABLE api.notes ADD CONSTRAINT notes_user_title_unique UNIQUE (user_id, title);
+    END IF;
+END$$;
