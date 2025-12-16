@@ -1,5 +1,7 @@
 -- Migration: Create template table and seed default templates
-CREATE TABLE IF NOT EXISTS api.template (
+SET search_path TO api, public;
+
+CREATE TABLE IF NOT EXISTS template (
   id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
@@ -7,8 +9,7 @@ CREATE TABLE IF NOT EXISTS api.template (
     fields TEXT[]
 );
 
--- Insert default templates if they don't already exist
-INSERT INTO api.template (name, description, default_content, fields)
+INSERT INTO template (name, description, default_content, fields)
 VALUES
   ('Meeting Notes', 'Template for meeting notes', 'Attendees:\nAgenda:\nNotes:\nAction Items:', ARRAY['Attendees', 'Agenda', 'Notes', 'Action Items']),
   ('Daily Journal', 'Template for daily journaling', 'Date:\nMood:\nHighlights:\nReflections:', ARRAY['Date', 'Mood', 'Highlights', 'Reflections']),

@@ -1,26 +1,8 @@
--- Migration: Create projects table
--- Date: 2025-10-07
--- Description: Creates the projects table to store project information for organizing notes
+-- Create projects table in api schema
+SET search_path TO api, public;
 
--- Create projects table
-CREATE TABLE IF NOT EXISTS api.projects (
+CREATE TABLE IF NOT EXISTS projects (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE
+    name VARCHAR(255) NOT NULL,
+    user_id BIGINT NOT NULL
 );
-
--- Add indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_projects_name ON api.projects(name);
-
--- Add constraints with descriptive names
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.table_constraints 
-        WHERE constraint_name = 'chk_projects_name_not_empty' 
-        AND table_name = 'projects' AND table_schema = 'api'
-    ) THEN
-        ALTER TABLE api.projects ADD CONSTRAINT chk_projects_name_not_empty 
-            CHECK (name IS NOT NULL AND LENGTH(TRIM(name)) > 0);
-    END IF;
-END
-$$;

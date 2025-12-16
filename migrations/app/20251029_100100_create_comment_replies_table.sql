@@ -1,5 +1,7 @@
--- Create comment_replies table
-CREATE TABLE IF NOT EXISTS api.comment_replies (
+-- Create comment_replies table in api schema
+SET search_path TO api, public;
+
+CREATE TABLE IF NOT EXISTS comment_replies (
   id BIGSERIAL PRIMARY KEY,
   comment_id BIGINT NOT NULL,
   note_id BIGINT NOT NULL,
@@ -10,12 +12,11 @@ CREATE TABLE IF NOT EXISTS api.comment_replies (
   content TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (comment_id) REFERENCES api.comments(id) ON DELETE CASCADE,
-  FOREIGN KEY (note_id) REFERENCES api.notes(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES api.users(id)
+  FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- Create indexes for comment_replies table
-CREATE INDEX IF NOT EXISTS idx_comment_replies_comment_id ON api.comment_replies(comment_id);
-CREATE INDEX IF NOT EXISTS idx_comment_replies_note_id ON api.comment_replies(note_id);
-CREATE INDEX IF NOT EXISTS idx_comment_replies_user_id ON api.comment_replies(user_id);
+CREATE INDEX IF NOT EXISTS idx_comment_replies_comment_id ON comment_replies(comment_id);
+CREATE INDEX IF NOT EXISTS idx_comment_replies_user_id ON comment_replies(user_id);
+CREATE INDEX IF NOT EXISTS idx_comment_replies_note_id ON comment_replies(note_id);
