@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS api.suggestions (
 );
 
 -- Create indexes for suggestions table
-CREATE INDEX IF NOT EXISTS idx_suggestions_note_id ON api.suggestions(note_id);
-CREATE INDEX IF NOT EXISTS idx_suggestions_user_id ON api.suggestions(user_id);
-CREATE INDEX IF NOT EXISTS idx_suggestions_status ON api.suggestions(status);
-CREATE INDEX IF NOT EXISTS idx_suggestions_line_start ON api.suggestions(line_start);
+CREATE INDEX IF NOT EXISTS idx_suggestions_note_id ON suggestions(note_id);
+CREATE INDEX IF NOT EXISTS idx_suggestions_user_id ON suggestions(user_id);
+CREATE INDEX IF NOT EXISTS idx_suggestions_status ON suggestions(status);
+CREATE INDEX IF NOT EXISTS idx_suggestions_line_start ON suggestions(line_start);

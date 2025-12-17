@@ -2,6 +2,9 @@
 -- This ensures efficient queries when fetching attachments for a specific note
 SET search_path TO api, public;
 
+-- Add index on note_id for faster joins and lookups
+CREATE INDEX IF NOT EXISTS idx_attachments_note_id ON attachments(note_id);
+
 -- Add index on hash for deduplication and integrity checks
 CREATE INDEX IF NOT EXISTS idx_attachments_hash ON attachments(hash);
 
