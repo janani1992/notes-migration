@@ -8,11 +8,13 @@ CREATE TABLE IF NOT EXISTS api.suggestions (
   user_name VARCHAR(255) NOT NULL,
   user_email VARCHAR(255) NOT NULL,
   user_role TEXT NOT NULL CHECK (user_role IN ('OWNER', 'EDITOR', 'VIEWER')),
-  original_text TEXT NOT NULL,
-  suggested_text TEXT NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
   line_start INT NOT NULL,
   line_end INT,
-  status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'ACCEPTED', 'REJECTED')),
+  original_text TEXT NOT NULL,
+  suggested_text TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'ACCEPTED', 'REJECTED', 'ARCHIVED')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   accepted_at TIMESTAMP WITH TIME ZONE,
@@ -24,7 +26,7 @@ CREATE TABLE IF NOT EXISTS api.suggestions (
 );
 
 -- Create indexes for suggestions table
-CREATE INDEX IF NOT EXISTS idx_suggestions_note_id ON suggestions(note_id);
-CREATE INDEX IF NOT EXISTS idx_suggestions_user_id ON suggestions(user_id);
-CREATE INDEX IF NOT EXISTS idx_suggestions_status ON suggestions(status);
-CREATE INDEX IF NOT EXISTS idx_suggestions_line_start ON suggestions(line_start);
+CREATE INDEX IF NOT EXISTS idx_suggestions_note_id ON api.suggestions(note_id);
+CREATE INDEX IF NOT EXISTS idx_suggestions_user_id ON api.suggestions(user_id);
+CREATE INDEX IF NOT EXISTS idx_suggestions_status ON api.suggestions(status);
+CREATE INDEX IF NOT EXISTS idx_suggestions_line_start ON api.suggestions(line_start);

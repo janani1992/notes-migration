@@ -15,4 +15,5 @@ VALUES
   ('Daily Journal', 'Template for daily journaling', 'Date:\nMood:\nHighlights:\nReflections:', ARRAY['Date', 'Mood', 'Highlights', 'Reflections']),
   ('Task List', 'Template for task management', 'Tasks:\n- [ ] Task 1\n- [ ] Task 2', ARRAY['Tasks']),
   ('Ideas & Brainstorming', 'Template for capturing ideas', 'Idea:\nDetails:\nNext Steps:', ARRAY['Idea', 'Details', 'Next Steps']),
-  ('Project Planning', 'Template for project planning', 'Project Name:\nGoals:\nMilestones:\nRisks:', ARRAY['Project Name', 'Goals', 'Milestones', 'Risks']);
+  ('Project Planning', 'Template for project planning', 'Project Name:\nGoals:\nMilestones:\nRisks:', ARRAY['Project Name', 'Goals', 'Milestones', 'Risks'])
+ON CONFLICT (name) DO NOTHING;
