@@ -22,7 +22,18 @@ UPDATE notes SET user_id = 1 WHERE user_id IS NULL;
 ALTER TABLE notes ALTER COLUMN user_id SET NOT NULL;
 
 -- Add foreign key constraint (optional, recommended)
-ALTER TABLE notes ADD CONSTRAINT fk_notes_user FOREIGN KEY (user_id) REFERENCES users(id);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_notes_user' 
+        AND table_schema = 'api'
+        AND table_name = 'notes'
+    ) THEN
+        ALTER TABLE notes ADD CONSTRAINT fk_notes_user FOREIGN KEY (user_id) REFERENCES users(id);
+    END IF;
+END
+$$;
 
 -- Ensure no notes have NULL content before enforcing NOT NULL constraint
 UPDATE notes SET content = '' WHERE content IS NULL;
@@ -38,4 +49,16 @@ BEGIN
     END IF;
 END$$;
 
-ALTER TABLE notes ADD CONSTRAINT notes_user_title_unique UNIQUE (user_id, title);
+-- Add unique constraint if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints
+        WHERE constraint_name = 'notes_user_title_unique' 
+        AND table_schema = 'api'
+        AND table_name = 'notes'
+    ) THEN
+        ALTER TABLE notes ADD CONSTRAINT notes_user_title_unique UNIQUE (user_id, title);
+    END IF;
+END
+$$;

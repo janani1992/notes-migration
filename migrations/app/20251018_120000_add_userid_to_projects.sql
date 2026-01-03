@@ -22,7 +22,18 @@ UPDATE projects SET user_id = 1 WHERE user_id IS NULL;
 ALTER TABLE projects ALTER COLUMN user_id SET NOT NULL;
 
 -- Add foreign key constraint (optional, recommended)
-ALTER TABLE projects ADD CONSTRAINT fk_projects_user FOREIGN KEY (user_id) REFERENCES users(id);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints 
+        WHERE constraint_name = 'fk_projects_user' 
+        AND table_schema = 'api'
+        AND table_name = 'projects'
+    ) THEN
+        ALTER TABLE projects ADD CONSTRAINT fk_projects_user FOREIGN KEY (user_id) REFERENCES users(id);
+    END IF;
+END
+$$;
 
 -- Remove global unique constraint on name if present, and add per-user unique constraint
 DO $$
@@ -35,4 +46,16 @@ BEGIN
     END IF;
 END$$;
 
-ALTER TABLE projects ADD CONSTRAINT projects_user_name_unique UNIQUE (user_id, name);
+-- Add unique constraint if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.table_constraints
+        WHERE constraint_name = 'projects_user_name_unique' 
+        AND table_schema = 'api'
+        AND table_name = 'projects'
+    ) THEN
+        ALTER TABLE projects ADD CONSTRAINT projects_user_name_unique UNIQUE (user_id, name);
+    END IF;
+END
+$$;
