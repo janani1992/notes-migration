@@ -15,12 +15,12 @@ CREATE TABLE IF NOT EXISTS api.notifications (
 );
 
 -- Create indexes for performance
-CREATE INDEX idx_notifications_user_id ON api.notifications(user_id);
-CREATE INDEX idx_notifications_is_read ON api.notifications(is_read);
-CREATE INDEX idx_notifications_created_at ON api.notifications(created_at DESC);
-CREATE INDEX idx_notifications_type ON api.notifications(type);
-CREATE INDEX idx_notifications_user_unread ON api.notifications(user_id, is_read) WHERE is_read = FALSE;
-CREATE INDEX idx_notifications_related_note ON api.notifications(related_note_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON api.notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON api.notifications(is_read);
+CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON api.notifications(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_type ON api.notifications(type);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON api.notifications(user_id, is_read) WHERE is_read = FALSE;
+CREATE INDEX IF NOT EXISTS idx_notifications_related_note ON api.notifications(related_note_id);
 
 -- Add comment
 COMMENT ON TABLE api.notifications IS 'Stores user notifications for mentions, reminders, and other alerts';
