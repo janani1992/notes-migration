@@ -15,11 +15,11 @@ CREATE TABLE IF NOT EXISTS api.reminders (
 );
 
 -- Create indexes for performance
-CREATE INDEX idx_reminders_user_id ON api.reminders(user_id);
-CREATE INDEX idx_reminders_note_id ON api.reminders(note_id);
-CREATE INDEX idx_reminders_remind_at ON api.reminders(remind_at);
-CREATE INDEX idx_reminders_status ON api.reminders(status);
-CREATE INDEX idx_reminders_pending_due ON api.reminders(status, remind_at) WHERE status = 'PENDING';
+CREATE INDEX IF NOT EXISTS idx_reminders_user_id ON api.reminders(user_id);
+CREATE INDEX IF NOT EXISTS idx_reminders_note_id ON api.reminders(note_id);
+CREATE INDEX IF NOT EXISTS idx_reminders_remind_at ON api.reminders(remind_at);
+CREATE INDEX IF NOT EXISTS idx_reminders_status ON api.reminders(status);
+CREATE INDEX IF NOT EXISTS idx_reminders_pending_due ON api.reminders(status, remind_at) WHERE status = 'PENDING';
 
 -- Add comment
 COMMENT ON TABLE api.reminders IS 'Stores user reminders for notes with deadlines';
