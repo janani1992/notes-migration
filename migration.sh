@@ -3,14 +3,6 @@ set -e
 
 echo "🔄 Starting database migration..."
 
-# Configuration
-: ${DATABASE_HOST:=postgres}
-: ${DATABASE_PORT:=5432}
-: ${DATABASE_NAME:=noteapp}
-: ${DATABASE_USER:=user}
-: ${POSTGRES_PASSWORD:=genLife}
-: ${MIGRATION_MODE:=all}
-
 # Wait for PostgreSQL
 echo "⏳ Waiting for PostgreSQL..."
 until PGPASSWORD=$POSTGRES_PASSWORD psql \

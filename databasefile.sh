@@ -1,6 +1,6 @@
 #!/bin/bash
 
-path="./database/db"
+path="./migrations/app/"
 
 
 # Get current timestamp
