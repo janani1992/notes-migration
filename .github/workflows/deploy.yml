@@ -1,0 +1,101 @@
+name: Build and Deploy to EC2
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}                   # e.g. us-east-1
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}           # e.g. notes-migration-repo
+  CONTAINER_NAME: notes-migration
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    outputs:
+      registry: ${{ steps.login-ecr.outputs.registry }}
+      image_tag: ${{ github.sha }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+    
+    - name: Ensure ECR repository exists
+      run: |
+        aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY }} || aws ecr create-repository --repository-name ${{ env.ECR_REPOSITORY }}
+
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Get ECR Login Password
+      id: ecr-password
+      run: |
+        PASSWORD=$(aws ecr get-login-password --region ${{ env.AWS_REGION }})
+        echo "::add-mask::$PASSWORD"
+        echo "password=$PASSWORD" >> $GITHUB_OUTPUT
+
+    - name: Deploy on EC2
+      uses: appleboy/ssh-action@v1.0.3
+      env:
+        ECR_REGISTRY: ${{ needs.build-and-push.outputs.registry }}
+        IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
+        ECR_PASSWORD: ${{ steps.ecr-password.outputs.password }}
+        DB_HOST: ${{ secrets.RDS_HOST }}
+        DB_USER: ${{ secrets.RDS_USER }}
+        DB_PASS: ${{ secrets.RDS_PASSWORD }}
+        DB_NAME: ${{ secrets.RDS_DB_NAME }}
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        envs: ECR_REPOSITORY,ECR_REGISTRY,IMAGE_TAG,CONTAINER_NAME,ECR_PASSWORD,DB_HOST,DB_USER,DB_PASS,DB_NAME
+        script: |
+          # Login to ECR using passed token
+          echo $ECR_PASSWORD | docker login --username AWS --password-stdin $ECR_REGISTRY
+          
+          # Pull the new image
+          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          
+          # Remove existing container if it exists
+          docker rm -f $CONTAINER_NAME || true
+          
+          # Run the migration container
+          echo "Starting migration..."
+          docker run --name $CONTAINER_NAME \
+            -e DATABASE_HOST=$DB_HOST \
+            -e DATABASE_USER=$DB_USER \
+            -e DATABASE_NAME=$DB_NAME \
+            -e POSTGRES_PASSWORD=$DB_PASS \
+            $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            
+          # Clean up old images to save space
+          docker image prune -f
