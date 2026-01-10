@@ -34,7 +34,13 @@ jobs:
     
     - name: Ensure ECR repository exists
       run: |
-        aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY }} || aws ecr create-repository --repository-name ${{ env.ECR_REPOSITORY }}
+        REPO_NAME="${{ env.ECR_REPOSITORY }}"
+        if aws ecr describe-repositories --repository-names "$REPO_NAME" >/dev/null 2>&1; then
+          echo "Repository $REPO_NAME already exists."
+        else
+          echo "Repository $REPO_NAME not found. Creating..."
+          aws ecr create-repository --repository-name "$REPO_NAME"
+        fi
 
     - name: Build, tag, and push image to Amazon ECR
       env:
