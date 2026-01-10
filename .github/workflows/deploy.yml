@@ -83,25 +83,26 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
+        port: 443
         envs: ECR_REPOSITORY,ECR_REGISTRY,IMAGE_TAG,CONTAINER_NAME,ECR_PASSWORD,DB_HOST,DB_USER,DB_PASS,DB_NAME
         script: |
-          # Login to ECR using passed token
-          echo $ECR_PASSWORD | docker login --username AWS --password-stdin $ECR_REGISTRY
+          set -e
+          echo "Logging into ECR..."
+          echo "$ECR_PASSWORD" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
           
-          # Pull the new image
-          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "Pulling image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker pull "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           
-          # Remove existing container if it exists
-          docker rm -f $CONTAINER_NAME || true
+          echo "Removing old container..."
+          docker rm -f "$CONTAINER_NAME" || true
           
-          # Run the migration container
-          echo "Starting migration..."
-          docker run --name $CONTAINER_NAME \
-            -e DATABASE_HOST=$DB_HOST \
-            -e DATABASE_USER=$DB_USER \
-            -e DATABASE_NAME=$DB_NAME \
-            -e POSTGRES_PASSWORD=$DB_PASS \
-            $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "Starting migration container..."
+          docker run --name "$CONTAINER_NAME" \
+            -e DATABASE_HOST="$DB_HOST" \
+            -e DATABASE_USER="$DB_USER" \
+            -e DATABASE_NAME="$DB_NAME" \
+            -e POSTGRES_PASSWORD="$DB_PASS" \
+            "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
             
-          # Clean up old images to save space
+          echo "Cleaning up..."
           docker image prune -f
