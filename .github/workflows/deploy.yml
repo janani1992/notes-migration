@@ -134,7 +134,7 @@ jobs:
             -e POSTGRES_PASSWORD="$DB_PASS" \
             "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
             
-          echo "Cleaning up..."[ -d "/migrations/crdt" ] && run_migrations "/migrations/crdt" "CRDT"
+          echo "Cleaning up..."
           docker image prune -f
 
     - name: Revoke Runner IP
