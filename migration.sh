@@ -52,26 +52,9 @@ run_migrations() {
     done
 }
 
+# Run core migrations
 
-# Run based on mode
-case "$MIGRATION_MODE" in
-    all)
-        run_migrations "/migrations/common" "Common"
-        run_migrations "/migrations/app" "Application"
-        run_migrations "/migrations/crdt" "CRDT"
-        ;;
-    app-only)
-        run_migrations "/migrations/common" "Common"
-        run_migrations "/migrations/app" "Application"
-        ;;
-    crdt-only)
-        run_migrations "/migrations/common" "Common"
-        run_migrations "/migrations/crdt" "CRDT"
-        ;;
-    *)
-        echo "❌ Invalid mode: $MIGRATION_MODE"
-        exit 1
-        ;;
-esac
+[ -d "/migrations/app" ] && run_migrations "/migrations/app" "Application"
+
 
 echo "✅ Migrations complete!"
