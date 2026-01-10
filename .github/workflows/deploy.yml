@@ -133,6 +133,7 @@ jobs:
             -e DATABASE_USER="$DB_USER" \
             -e DATABASE_NAME="$DB_NAME" \
             -e POSTGRES_PASSWORD="$DB_PASS" \
+            -e MIGRATION_MODE="all" \
             "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
             
           echo "Cleaning up..."
