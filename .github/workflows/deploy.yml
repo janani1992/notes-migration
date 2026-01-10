@@ -62,12 +62,18 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Get ECR Login Password
-      id: ecr-password
+    - name: Get ECR Details
+      id: ecr-details
       run: |
+        # Get Password
         PASSWORD=$(aws ecr get-login-password --region ${{ env.AWS_REGION }})
         echo "::add-mask::$PASSWORD"
         echo "password=$PASSWORD" >> $GITHUB_OUTPUT
+        
+        # Get Registry URI
+        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+        REGISTRY="${ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com"
+        echo "registry=$REGISTRY" >> $GITHUB_OUTPUT
 
     - name: Get Runner IP
       id: ip
@@ -85,9 +91,9 @@ jobs:
     - name: Deploy on EC2
       uses: appleboy/ssh-action@v1.0.3
       env:
-        ECR_REGISTRY: ${{ needs.build-and-push.outputs.registry }}
+        ECR_REGISTRY: ${{ steps.ecr-details.outputs.registry }}
         IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
-        ECR_PASSWORD: ${{ steps.ecr-password.outputs.password }}
+        ECR_PASSWORD: ${{ steps.ecr-details.outputs.password }}
         DB_HOST: ${{ secrets.RDS_HOST }}
         DB_USER: ${{ secrets.RDS_USER }}
         DB_PASS: ${{ secrets.RDS_PASSWORD }}
@@ -102,6 +108,16 @@ jobs:
         envs: ECR_REPOSITORY,ECR_REGISTRY,IMAGE_TAG,CONTAINER_NAME,ECR_PASSWORD,DB_HOST,DB_USER,DB_PASS,DB_NAME
         script: |
           set -e
+          
+          echo "Debug: Registry is '$ECR_REGISTRY'"
+          echo "Debug: Repo is '$ECR_REPOSITORY'"
+          echo "Debug: Tag is '$IMAGE_TAG'"
+          
+          if [ -z "$ECR_REGISTRY" ]; then
+            echo "Error: ECR_REGISTRY variable is empty"
+            exit 1
+          fi
+          
           echo "Logging into ECR..."
           echo "$ECR_PASSWORD" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
           
