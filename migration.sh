@@ -15,28 +15,23 @@ until PGPASSWORD=$POSTGRES_PASSWORD psql \
 done
 
 
-echo "✅ PostgreSQL is up!"
+echo "✅ PostgreSQL is up! (Version: Debug-NoFunction)"
 
-# Function to run migrations from a directory
-run_migrations() {
-    local DIR=$1
-    local DESC=$2
+# Direct logic for app migrations to avoid function issues
+MIGRATION_DIR="/migrations/app"
+
+if [ -d "$MIGRATION_DIR" ]; then
+    echo "📦 Running Application migrations..."
     
-    if [ ! -d "$DIR" ]; then
-        echo "⚠️  $DIR not found"
-        return
-    fi
+    # Use find to safely list files, loop over them
+    # We sort the output of find to ensure order
     
-    local SQL_FILES=$(ls $DIR/*.sql 2>/dev/null | sort)
+    # Note: If no files exist, find returns nothing.
+    # We use temporary file to handle list safely
     
-    if [ -z "$SQL_FILES" ]; then
-        echo "📦 $DESC: No migrations"
-        return
-    fi
+    find "$MIGRATION_DIR" -name "*.sql" | sort > /tmp/migrations.list
     
-    echo "📦 Running $DESC migrations..."
-    
-    for file in $SQL_FILES; do
+    while IFS= read -r file; do
         filename=$(basename "$file")
         echo "  ▶️  $filename"
         
@@ -47,14 +42,13 @@ run_migrations() {
             -f "$file" \
             --single-transaction \
             --set ON_ERROR_STOP=on
-        
+            
         echo "  ✅ $filename"
-    done
-}
-
-# Run core migrations
-
-[ -d "/migrations/app" ] && run_migrations "/migrations/app" "Application"
-
+    done < /tmp/migrations.list
+    
+    rm /tmp/migrations.list
+else
+    echo "⚠️  $MIGRATION_DIR not found"
+fi
 
 echo "✅ Migrations complete!"
