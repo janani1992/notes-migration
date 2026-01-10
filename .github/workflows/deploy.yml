@@ -1,8 +1,7 @@
 name: Build and Deploy to EC2
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}                   # e.g. us-east-1
@@ -135,7 +134,7 @@ jobs:
             -e POSTGRES_PASSWORD="$DB_PASS" \
             "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
             
-          echo "Cleaning up..."
+          echo "Cleaning up..."[ -d "/migrations/crdt" ] && run_migrations "/migrations/crdt" "CRDT"
           docker image prune -f
 
     - name: Revoke Runner IP
