@@ -69,6 +69,19 @@ jobs:
         echo "::add-mask::$PASSWORD"
         echo "password=$PASSWORD" >> $GITHUB_OUTPUT
 
+    - name: Get Runner IP
+      id: ip
+      run: |
+        echo "ip=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
+
+    - name: Whitelist Runner IP
+      run: |
+        aws ec2 authorize-security-group-ingress \
+          --group-id ${{ secrets.EC2_SG_ID }} \
+          --protocol tcp \
+          --port 443 \
+          --cidr ${{ steps.ip.outputs.ip }}/32
+
     - name: Deploy on EC2
       uses: appleboy/ssh-action@v1.0.3
       env:
@@ -84,6 +97,8 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         port: 443
+        timeout: 60s
+        command_timeout: 30m
         envs: ECR_REPOSITORY,ECR_REGISTRY,IMAGE_TAG,CONTAINER_NAME,ECR_PASSWORD,DB_HOST,DB_USER,DB_PASS,DB_NAME
         script: |
           set -e
@@ -106,3 +121,12 @@ jobs:
             
           echo "Cleaning up..."
           docker image prune -f
+
+    - name: Revoke Runner IP
+      if: always()
+      run: |
+        aws ec2 revoke-security-group-ingress \
+          --group-id ${{ secrets.EC2_SG_ID }} \
+          --protocol tcp \
+          --port 443 \
+          --cidr ${{ steps.ip.outputs.ip }}/32
