@@ -85,7 +85,18 @@ jobs:
           --group-id ${{ secrets.EC2_SG_ID }} \
           --protocol tcp \
           --port 2222 \
-          --cidr ${{ steps.ip.outputs.ip }}/32
+          --cidr ${{ steps.ip.outputs.ip }}/32 || echo "Rule may already exist, continuing..."
+
+        # Verify connectivity instead of blind sleep
+        echo "Waiting for port 2222 to become reachable..."
+        for i in $(seq 1 10); do
+          if nc -zv -w 5 ${{ secrets.EC2_HOST }} 2222 2>&1; then
+            echo "Port 2222 is reachable"
+            break
+          fi
+          echo "Attempt $i/10: Port not reachable yet, retrying..."
+          sleep 10
+        done
 
     - name: Deploy on EC2
       uses: appleboy/ssh-action@v1.0.3
