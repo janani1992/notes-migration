@@ -80,23 +80,35 @@ jobs:
         echo "ip=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
 
     - name: Whitelist Runner IP
+      id: whitelist
       run: |
+        # 1. Get the current runner IP
+        RUNNER_IP=$(curl -s https://checkip.amazonaws.com)
+        echo "Runner IP: $RUNNER_IP"
+        
+        # 2. Add the rule to AWS
         aws ec2 authorize-security-group-ingress \
           --group-id ${{ secrets.EC2_SG_ID }} \
           --protocol tcp \
           --port 2222 \
-          --cidr ${{ steps.ip.outputs.ip }}/32 || echo "Rule may already exist, continuing..."
+          --cidr ${RUNNER_IP}/32 || echo "Rule already exists"
 
-        # Verify connectivity instead of blind sleep
-        echo "Waiting for port 2222 to become reachable..."
-        for i in $(seq 1 10); do
-          if nc -zv -w 5 ${{ secrets.EC2_HOST }} 2222 2>&1; then
-            echo "Port 2222 is reachable"
-            break
-          fi
-          echo "Attempt $i/10: Port not reachable yet, retrying..."
-          sleep 10
-        done
+        # 3. VERIFY: Ask AWS if the rule is actually there now
+        echo "Verifying rule application..."
+        CHECK=$(aws ec2 describe-security-groups \
+          --group-ids ${{ secrets.EC2_SG_ID }} \
+          --query "SecurityGroups[0].IpPermissions[?ToPort==\`2222\`].IpRanges[?CidrIp=='$RUNNER_IP/32']" \
+          --output text)
+
+        if [ -z "$CHECK" ]; then
+          echo "ERROR: Security Group was NOT updated. Check your AWS_ACCESS_KEY permissions."
+          exit 1
+        else
+          echo "SUCCESS: IP $RUNNER_IP is now whitelisted."
+        fi
+        
+        # 4. Small sleep for AWS propagation
+        sleep 10
 
     - name: Deploy on EC2
       uses: appleboy/ssh-action@v1.0.3
