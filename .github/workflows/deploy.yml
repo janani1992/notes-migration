@@ -87,17 +87,25 @@ jobs:
         echo "Runner IP: $RUNNER_IP"
         
         # 2. Add the rule to AWS
-        aws ec2 authorize-security-group-ingress \
+        OUTPUT=$(aws ec2 authorize-security-group-ingress \
           --group-id ${{ secrets.EC2_SG_ID }} \
           --protocol tcp \
           --port 2222 \
-          --cidr ${RUNNER_IP}/32 || echo "Rule already exists"
+          --cidr ${RUNNER_IP}/32 2>&1) || {
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -q "InvalidPermission.Duplicate"; then
+            echo "Rule already exists, continuing."
+          else
+            echo "Failed to add security group rule. Check IAM permissions for ec2:AuthorizeSecurityGroupIngress."
+            exit 1
+          fi
+        }
 
         # 3. VERIFY: Ask AWS if the rule is actually there now
         echo "Verifying rule application..."
         CHECK=$(aws ec2 describe-security-groups \
           --group-ids ${{ secrets.EC2_SG_ID }} \
-          --query "SecurityGroups[0].IpPermissions[?ToPort==\`2222\`].IpRanges[?CidrIp=='$RUNNER_IP/32']" \
+          --query "SecurityGroups[0].IpPermissions[?ToPort==\`2222\`][].IpRanges[?CidrIp==\`${RUNNER_IP}/32\`][]" \
           --output text)
 
         if [ -z "$CHECK" ]; then
