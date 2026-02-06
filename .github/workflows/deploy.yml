@@ -77,14 +77,15 @@ jobs:
     - name: Get Runner IP
       id: ip
       run: |
-        echo "ip=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
+        IP=$(curl -s https://checkip.amazonaws.com)
+        echo "Runner IP: $IP"
+        echo "ip=$IP" >> $GITHUB_OUTPUT
 
     - name: Whitelist Runner IP
       id: whitelist
       run: |
-        # 1. Get the current runner IP
-        RUNNER_IP=$(curl -s https://checkip.amazonaws.com)
-        echo "Runner IP: $RUNNER_IP"
+        # 1. Use the IP from previous step
+        RUNNER_IP="${{ steps.ip.outputs.ip }}"
         
         # 2. Add the rule to AWS
         OUTPUT=$(aws ec2 authorize-security-group-ingress \
@@ -115,8 +116,9 @@ jobs:
           echo "SUCCESS: IP $RUNNER_IP is now whitelisted."
         fi
         
-        # 4. Small sleep for AWS propagation
-        sleep 10
+        # 4. Wait for AWS security group propagation
+        echo "Waiting for security group rule to propagate..."
+        sleep 30
 
     - name: Deploy on EC2
       uses: appleboy/ssh-action@v1.0.3
